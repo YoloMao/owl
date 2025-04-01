@@ -21,6 +21,7 @@ from .enhanced_role_playing import (
 )
 from .gaia import GAIABenchmark
 from .document_toolkit import DocumentProcessingToolkit
+from .custom_browser_toolkit import BrowserToolkit
 
 __all__ = [
     "extract_pattern",
@@ -30,4 +31,5 @@ __all__ = [
     "arun_society",
     "GAIABenchmark",
     "DocumentProcessingToolkit",
+    "BrowserToolkit"
 ]

@@ -17,16 +17,13 @@ import sys
 from dotenv import load_dotenv
 from camel.models import ModelFactory
 from camel.toolkits import (
-    CodeExecutionToolkit,
-    ExcelToolkit,
     ImageAnalysisToolkit,
-    SearchToolkit,
-    BrowserToolkit,
-    FileWriteToolkit,
 )
 from camel.types import ModelPlatformType
 
 from owl.utils import run_society
+from owl.utils import BrowserToolkit
+
 from camel.societies import RolePlaying
 from camel.logger import set_log_level
 
@@ -53,38 +50,34 @@ def construct_society(question: str) -> RolePlaying:
     models = {
         "user": ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
-            model_type="qwen-max",
+            model_type="Qwen/Qwen2.5-72B-Instruct",
             api_key=os.getenv("QWEN_API_KEY"),
-            url="https://dashscope.aliyuncs.com/compatible-mode/v1",
-            model_config_dict={"temperature": 0.4, "max_tokens": 128000},
+            url="https://api-inference.modelscope.cn/v1/",
         ),
         "assistant": ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
-            model_type="qwen-max",
+            model_type="Qwen/Qwen2.5-72B-Instruct",
             api_key=os.getenv("QWEN_API_KEY"),
-            url="https://dashscope.aliyuncs.com/compatible-mode/v1",
-            model_config_dict={"temperature": 0.4, "max_tokens": 128000},
+            url="https://api-inference.modelscope.cn/v1/",
         ),
         "browsing": ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
-            model_type="qwen-vl-max",
+            model_type='Qwen/Qwen2.5-VL-72B-Instruct',
             api_key=os.getenv("QWEN_API_KEY"),
-            url="https://dashscope.aliyuncs.com/compatible-mode/v1",
-            model_config_dict={"temperature": 0.4, "max_tokens": 128000},
+            url="https://api-inference.modelscope.cn/v1/",
+            model_config_dict={"temperature": 0},
         ),
         "planning": ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
-            model_type="qwen-max",
+            model_type="Qwen/Qwen2.5-72B-Instruct",
             api_key=os.getenv("QWEN_API_KEY"),
-            url="https://dashscope.aliyuncs.com/compatible-mode/v1",
-            model_config_dict={"temperature": 0.4, "max_tokens": 128000},
+            url="https://api-inference.modelscope.cn/v1/",
         ),
         "image": ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
-            model_type="qwen-vl-max",
+            model_type='Qwen/Qwen2.5-VL-72B-Instruct',
             api_key=os.getenv("QWEN_API_KEY"),
-            url="https://dashscope.aliyuncs.com/compatible-mode/v1",
-            model_config_dict={"temperature": 0.4, "max_tokens": 128000},
+            url="https://api-inference.modelscope.cn/v1/",
         ),
     }
 
@@ -94,14 +87,9 @@ def construct_society(question: str) -> RolePlaying:
             headless=False,  # Set to True for headless mode (e.g., on remote servers)
             web_agent_model=models["browsing"],
             planning_agent_model=models["planning"],
+            output_language="中文",
         ).get_tools(),
-        *CodeExecutionToolkit(sandbox="subprocess", verbose=True).get_tools(),
         *ImageAnalysisToolkit(model=models["image"]).get_tools(),
-        SearchToolkit().search_duckduckgo,
-        SearchToolkit().search_google,  # Comment this out if you don't have google search
-        SearchToolkit().search_wiki,
-        *ExcelToolkit().get_tools(),
-        *FileWriteToolkit(output_dir="./").get_tools(),
     ]
 
     # Configure agent roles and parameters
@@ -121,6 +109,7 @@ def construct_society(question: str) -> RolePlaying:
         user_agent_kwargs=user_agent_kwargs,
         assistant_role_name="assistant",
         assistant_agent_kwargs=assistant_agent_kwargs,
+        output_language="中文",
     )
 
     return society
@@ -129,8 +118,9 @@ def construct_society(question: str) -> RolePlaying:
 def main():
     r"""Main function to run the OWL system with an example question."""
     # Example research question
-    default_task = "Navigate to Amazon.com and identify one product that is attractive to coders. Please provide me with the product name and price. No need to verify your answer."
-
+    default_task = """
+    打开 https://portal.growingio.com, 点击进入 GrowingIO 项目，在【我的关注】区域，添加一个单图，单图内容需包括【访问用户趋势】和【新用户访问趋势】
+    """
     # Override default task if command line argument is provided
     task = sys.argv[1] if len(sys.argv) > 1 else default_task
 
