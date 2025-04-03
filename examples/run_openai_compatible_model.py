@@ -73,12 +73,6 @@ def construct_society(question: str) -> RolePlaying:
             api_key=os.getenv("QWEN_API_KEY"),
             url="https://api-inference.modelscope.cn/v1/",
         ),
-        "image": ModelFactory.create(
-            model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
-            model_type='Qwen/Qwen2.5-VL-72B-Instruct',
-            api_key=os.getenv("QWEN_API_KEY"),
-            url="https://api-inference.modelscope.cn/v1/",
-        ),
     }
 
     # Configure toolkits
@@ -89,7 +83,6 @@ def construct_society(question: str) -> RolePlaying:
             planning_agent_model=models["planning"],
             output_language="中文",
         ).get_tools(),
-        *ImageAnalysisToolkit(model=models["image"]).get_tools(),
     ]
 
     # Configure agent roles and parameters
